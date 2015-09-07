@@ -47,6 +47,7 @@ import android.widget.TextView;
 
 
 import com.opentok.android.OpenTokConfig;
+import com.opentok.android.meet.fragments.PublisherControlFragment;
 import com.opentok.android.meet.services.ClearNotificationService;
 import com.opentok.android.meet.services.ClearNotificationService.ClearBinder;
 
@@ -56,7 +57,7 @@ import meet.android.opentok.com.opentokmeet.R;
 import static meet.android.opentok.com.opentokmeet.R.color.black;
 
 
-public class ChatRoomActivity extends Activity {
+public class ChatRoomActivity extends Activity implements PublisherControlFragment.PublisherCallbacks {
 
     private static final String LOGTAG = "opentok-meet-chat-room";
 
@@ -81,6 +82,8 @@ public class ChatRoomActivity extends Activity {
     private ViewGroup mLastParticipantView;
     private LinearLayout mParticipantsView;
     private ProgressBar mLoadingSub; // Spinning wheel for loading subscriber view
+
+    protected PublisherControlFragment mPublisherFragment;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,6 +127,10 @@ public class ChatRoomActivity extends Activity {
 
         TextView title = (TextView) findViewById(R.id.title);
         title.setText(mRoomName);
+
+        if (savedInstanceState == null) {
+            initPublisherFragment();
+        }
 
         mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -362,6 +369,7 @@ public class ChatRoomActivity extends Activity {
                 mConnectingDialog.dismiss();
                 mRoom = room;
                 mRoom.setPreviewView(mPreview);
+                mPreview.setOnClickListener(onViewClick);
                 mRoom.setParticipantsViewContainer(mParticipantsView, mLastParticipantView, null);
                 mRoom.setMessageView((TextView) findViewById(R.id.messageView),
                         (ScrollView) findViewById(R.id.scroller));
@@ -523,4 +531,51 @@ public class ChatRoomActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         return lp;
     }
+
+    //Initialize fragments
+    public void initPublisherFragment() {
+        mPublisherFragment = new PublisherControlFragment();
+        getFragmentManager().beginTransaction()
+                .add(R.id.fragment_pub_container, mPublisherFragment)
+                .commit();
+    }
+
+    @Override
+    public void onMutePublisher() {
+        if (mRoom.getPublisher() != null) {
+            mRoom.getPublisher().setPublishAudio(
+                    !mRoom.getPublisher().getPublishAudio());
+        }
+    }
+
+    @Override
+    public void onSwapCamera() {
+        if (mRoom.getPublisher() != null) {
+            mRoom.getPublisher().swapCamera();
+        }
+    }
+
+    @Override
+    public void onEndCall() {
+        if (mRoom != null) {
+            mRoom.disconnect();
+        }
+
+        finish();
+    }
+
+    private View.OnClickListener onViewClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            boolean visible = false;
+
+            if (mRoom.getPublisher() != null) {
+                // check visibility of bars
+                if (!mPublisherFragment.isPublisherWidgetVisible()) {
+                    visible = true;
+                }
+                mPublisherFragment.publisherClick();
+            }
+        }
+    };
 }
