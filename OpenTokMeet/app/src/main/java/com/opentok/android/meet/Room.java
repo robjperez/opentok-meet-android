@@ -198,7 +198,7 @@ public class Room extends Session {
 
         mActivity.getLoadingSub().setVisibility(View.VISIBLE);
         p.setPreferredResolution(Participant.VGA_VIDEO_RESOLUTION);
-
+        p.getView().setOnClickListener(clickLastParticipantListener);
         mLastParticipant = p;
 
         //Subscribe to this participant
@@ -266,13 +266,14 @@ public class Room extends Session {
         LinearLayout.LayoutParams lp = mActivity.getMainLayoutParams();
         Participant currentSelected = mParticipantStream.get(view.getTag());
         currentSelected.setPreferredResolution(Participant.VGA_VIDEO_RESOLUTION);
-        currentSelected.getView().setOnLongClickListener(longClickListener);
-        currentSelected.getView().setOnClickListener(clickListener);
+        currentSelected.getView().setOnClickListener(clickLastParticipantListener);
+        currentSelected.getView().setOnLongClickListener(null);
         this.mLastParticipantView.addView(currentSelected.getView(), lp);
 
         lp = mActivity.getQVGALayoutParams();
-        mLastParticipant.getView().setOnLongClickListener(longClickListener);
         mLastParticipant.getView().setOnClickListener(clickListener);
+        mLastParticipant.getView().setOnLongClickListener(longClickListener);
+        mLastParticipant.getView().setOnLongClickListener(longClickListener);
         this.mParticipantsViewContainer.addView(mLastParticipant.getView(), index, lp);
 
         mLastParticipant = currentSelected;
@@ -281,13 +282,15 @@ public class Room extends Session {
 
     View.OnLongClickListener longClickListener = new View.OnLongClickListener() {
         public boolean onLongClick(View view) {
-            swapSubPriority(view);
+            if (!view.equals(mLastParticipantView)){
+                swapSubPriority(view);
+            }
+
             return true;
         }
     };
 
     View.OnClickListener clickListener = new View.OnClickListener() {
-
         @Override
         public void onClick(View view) {
 
@@ -306,6 +309,13 @@ public class Room extends Session {
         }
         mActivity.setAudioOnlyViewListPartcipants(enableAudioOnly, participant, index, this);
 
+        }
+    };
+
+    View.OnClickListener clickLastParticipantListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+           mActivity.disableVideo(view);
         }
     };
 }

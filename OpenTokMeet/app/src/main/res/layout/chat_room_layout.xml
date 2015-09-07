@@ -31,8 +31,7 @@
             android:layout_height="220dp"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:onClick="disableVideo">
+            android:layout_marginRight="20dp">
 
             <ProgressBar
                 android:id="@+id/loadingSpinner"
