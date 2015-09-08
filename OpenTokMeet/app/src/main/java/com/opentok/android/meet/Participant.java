@@ -19,6 +19,8 @@ public class Participant extends Subscriber {
 
     protected static final VideoUtils.Size VGA_VIDEO_RESOLUTION = new VideoUtils.Size(640, 480);
     protected static final VideoUtils.Size QVGA_VIDEO_RESOLUTION = new VideoUtils.Size(320, 240);
+    protected static final int MAX_FPS = 30;
+    protected static final int MID_FPS = 15;
 
     private String mUserId;
     private String mName;

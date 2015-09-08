@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import android.content.Context;
 import android.os.Handler;
+import android.provider.Telephony;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
@@ -190,6 +191,7 @@ public class Room extends Session {
 
             final LinearLayout.LayoutParams lp = mActivity.getQVGALayoutParams();
             lastParticipant.setPreferredResolution(Participant.QVGA_VIDEO_RESOLUTION);
+            lastParticipant.setPreferredFrameRate(Participant.MID_FPS);
             this.mParticipantsViewContainer.addView(lastParticipant.getView(), lp);
             lastParticipant.setSubscribeToVideo(true);
             lastParticipant.getView().setOnLongClickListener(longClickListener);
@@ -198,6 +200,7 @@ public class Room extends Session {
 
         mActivity.getLoadingSub().setVisibility(View.VISIBLE);
         p.setPreferredResolution(Participant.VGA_VIDEO_RESOLUTION);
+        p.setPreferredFrameRate(Participant.MAX_FPS);
         p.getView().setOnClickListener(clickLastParticipantListener);
         mLastParticipant = p;
 
@@ -266,6 +269,7 @@ public class Room extends Session {
         LinearLayout.LayoutParams lp = mActivity.getMainLayoutParams();
         Participant currentSelected = mParticipantStream.get(view.getTag());
         currentSelected.setPreferredResolution(Participant.VGA_VIDEO_RESOLUTION);
+        currentSelected.setPreferredFrameRate(Participant.MAX_FPS);
         currentSelected.getView().setOnClickListener(clickLastParticipantListener);
         currentSelected.getView().setOnLongClickListener(null);
         this.mLastParticipantView.addView(currentSelected.getView(), lp);
@@ -273,7 +277,8 @@ public class Room extends Session {
         lp = mActivity.getQVGALayoutParams();
         mLastParticipant.getView().setOnClickListener(clickListener);
         mLastParticipant.getView().setOnLongClickListener(longClickListener);
-        mLastParticipant.getView().setOnLongClickListener(longClickListener);
+        mLastParticipant.setPreferredResolution(Participant.QVGA_VIDEO_RESOLUTION);
+        mLastParticipant.setPreferredFrameRate(Participant.MID_FPS);
         this.mParticipantsViewContainer.addView(mLastParticipant.getView(), index, lp);
 
         mLastParticipant = currentSelected;
