@@ -443,27 +443,15 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         mRoom.loadSubscriberView();
     }
 
-    //last participant video view
-    public void disableVideo(View view){
-        boolean enableAudioOnly = this.mRoom.getLastParticipant().getSubscribeToVideo();
-        if (enableAudioOnly) {
-            this.mRoom.getLastParticipant().setSubscribeToVideo(false);
-        }
-        else {
-            this.mRoom.getLastParticipant().setSubscribeToVideo(true);
-        }
-
-        setAudioOnlyViewLastParticipant(enableAudioOnly, this.mRoom.getLastParticipant());
-    }
-
     //Show audio only icon when video quality changed and it is disabled for the last subscriber
-    public void setAudioOnlyViewLastParticipant(boolean audioOnlyEnabled, Participant participant) {
+    public void setAudioOnlyViewLastParticipant(boolean audioOnlyEnabled, Participant participant, View.OnClickListener clickLastParticipantListener) {
         boolean subscriberVideoOnly = audioOnlyEnabled;
 
         if (audioOnlyEnabled) {
             this.mRoom.getLastParticipantView().removeView(participant.getView());
-            this.mRoom.getLastParticipantView().addView(getAudioOnlyIcon());
-
+            View audioOnlyView = getAudioOnlyIcon();
+            this.mRoom.getLastParticipantView().addView(audioOnlyView);
+            audioOnlyView.setOnClickListener(clickLastParticipantListener);
             //TODO add audiometer
         } else {
             if (!subscriberVideoOnly) {

@@ -320,7 +320,13 @@ public class Room extends Session {
     View.OnClickListener clickLastParticipantListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-           mActivity.disableVideo(view);
+            boolean enableAudioOnly = mLastParticipant.getSubscribeToVideo();
+            if (enableAudioOnly) {
+                mLastParticipant.setSubscribeToVideo(false);
+            } else {
+                mLastParticipant.setSubscribeToVideo(true);
+            }
+            mActivity.setAudioOnlyViewLastParticipant(enableAudioOnly, mLastParticipant, this);
         }
     };
 }
