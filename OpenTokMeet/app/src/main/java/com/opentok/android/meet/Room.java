@@ -24,10 +24,11 @@ import com.opentok.android.Publisher;
 import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
+import com.opentok.android.profiler.PerformanceProfiler;
 
 import meet.android.opentok.com.opentokmeet.R;
 
-public class Room extends Session {
+public class Room extends Session implements PerformanceProfiler.CPUStatListener, PerformanceProfiler.MemStatListener {
 
     private static final String LOGTAG = "opentok-meet-room";
 
@@ -58,6 +59,7 @@ public class Room extends Session {
 
     private ChatRoomActivity mActivity;
 
+    PerformanceProfiler mProfiler;
 
     public Room(Context context, String roomName, String sessionId, String token, String apiKey,
                 String username) {
@@ -69,6 +71,10 @@ public class Room extends Session {
         this.mPublisherName = username;
         this.mHandler = new Handler(context.getMainLooper());
         this.mActivity = (ChatRoomActivity) this.mContext;
+
+        mProfiler = new PerformanceProfiler(mContext);
+        mProfiler.setCPUListener(this);
+        mProfiler.setMemoryStatListener(this);
     }
 
     public void setParticipantsViewContainer(LinearLayout container, ViewGroup lastParticipantView,
@@ -120,6 +126,8 @@ public class Room extends Session {
         if (mPublisher != null) {
             mPreview.setVisibility(View.GONE);
         }
+
+        stopGetMetrics();
     }
 
     @Override
@@ -231,6 +239,8 @@ public class Room extends Session {
         mPreview.addView(v, lp);
         mPublisher.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
                 BaseVideoRenderer.STYLE_VIDEO_FILL);
+
+        startGetMetrics();
 
     }
 
@@ -387,8 +397,36 @@ public class Room extends Session {
         }
     };
 
-    private void checkSimulcastMode(int item){
 
+    private void startGetMetrics(){
+       // mProfiler.startBatteryMetrics();
+
+        //start cpu profiling
+       // mProfiler.startCPUMetrics();
+
+        //start mem profiling
+        mProfiler.startMemMetrics();
+
+    }
+
+    private void stopGetMetrics(){
+       // mProfiler.stopBatteryMetrics();
+
+        //start cpu profiling
+       // mProfiler.stopCPUMetrics();
+
+        //start mem profiling
+        mProfiler.stopMemMetrics();
+
+    }
+
+    @Override
+    public void onCPU(float v, float v1) {
+        Log.d("MARINAS", "cpu values total "+v + "process:" + v1);
+    }
+
+    @Override
+    public void onMemoryStat(double v, double v1, double v2, double v3) {
 
     }
 }
