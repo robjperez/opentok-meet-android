@@ -11,4 +11,5 @@
     <style name="AppTheme.RoomSelectionArea">
         <item name="android:background">@color/grey</item>
     </style>
+
 </resources>

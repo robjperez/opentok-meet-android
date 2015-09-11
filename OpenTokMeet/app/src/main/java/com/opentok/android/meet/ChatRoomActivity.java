@@ -43,6 +43,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 
@@ -63,11 +64,14 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
 
     public static final String ARG_ROOM_ID = "roomId";
     public static final String ARG_USERNAME_ID = "usernameId";
+    public static final String PUB_SIMULCAST = "PUB_SIMULCAST";
 
     private String serverURL = null;
     private String mRoomName;
     private Room mRoom;
     private String mUsername = null;
+
+    private int mSimulcastPub = 0;
 
     private ProgressDialog mConnectingDialog;
     private AlertDialog mErrorDialog;
@@ -128,6 +132,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         TextView title = (TextView) findViewById(R.id.title);
         title.setText(mRoomName);
 
+        mSimulcastPub = getIntent().getIntExtra(PUB_SIMULCAST, 0);
         if (savedInstanceState == null) {
             initPublisherFragment();
         }
@@ -566,4 +571,10 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
             }
         }
     };
+
+
+    public int getSimulcastPub() {
+        return mSimulcastPub;
+    }
+
 }

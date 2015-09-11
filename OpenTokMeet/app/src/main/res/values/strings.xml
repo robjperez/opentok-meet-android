@@ -26,4 +26,15 @@
     <string	name="clearNotificationService">Clear Notification</string>
 
     <string name="serverURL">"http://meet.tokbox.com/"</string>
+
+    <string name="pub_simulcast_prompt">Choose the publisher simulcast</string>
+
+    <string-array name="pub_simulcast">
+        <item>Simulcast: None</item>
+        <item>Simulcast: Default VGA</item>
+        <item>Simulcast: Default 720</item>
+        <item>Simulcast: Custom VGA</item>
+        <item>Simulcast: Custom 720</item>
+    </string-array>
+
 </resources>

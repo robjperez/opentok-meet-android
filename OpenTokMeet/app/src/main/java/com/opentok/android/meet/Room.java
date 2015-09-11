@@ -69,8 +69,6 @@ public class Room extends Session {
         this.mPublisherName = username;
         this.mHandler = new Handler(context.getMainLooper());
         this.mActivity = (ChatRoomActivity) this.mContext;
-
-
     }
 
     public void setParticipantsViewContainer(LinearLayout container, ViewGroup lastParticipantView,
@@ -142,9 +140,68 @@ public class Room extends Session {
         }, 500);
     }
 
+    private float[][] getTemLayersAdj (){
+        float tempLadj [][];
+        tempLadj = new float[4][4];
+
+        for(int i=0; i<4; i++) {
+
+            for(int j=0; j<4; j++) {
+                if (j == 0 ){
+                    tempLadj[i][j] = 0.1f;
+                }
+                else {
+                    tempLadj[i][j] = 1.0f;
+                }
+
+            }
+        }
+        return tempLadj;
+    }
+    private Publisher getSimulcastPublisher(){
+
+        int simulcastLevel = mActivity.getSimulcastPub();
+        Publisher publisher = null;
+
+        switch (simulcastLevel) {
+            case 0: {
+                Log.d(LOGTAG, "Publisher simulcast is disabled");
+                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevelNone, 0, null);
+
+                break;
+            }
+            case 1: {
+                Log.d(LOGTAG, "Publisher simulcast: Default VGA");
+                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevelVGA, 0, null);
+                break;
+            }
+            case 2: {
+                Log.d(LOGTAG, "Publisher simulcast: Default 720p");
+                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevel720p, 0, null);
+                break;
+            }
+
+            case 3: {
+                Log.d(LOGTAG, "Publisher simulcast: Custom VGA");
+                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevelVGA, 1, getTemLayersAdj());
+                break;
+            }
+
+            case 4: {
+                Log.d(LOGTAG, "Publisher simulcast: Custom 720p");
+                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevel720p, 1, getTemLayersAdj());
+                break;
+            }
+        }
+        return publisher;
+    }
+
     @Override
     protected void onConnected() {
-        mPublisher = new Publisher(mContext, "Android");
+        //check simulcast case for publisher
+
+        //mPublisher = new Publisher(mContext, "Android");
+        mPublisher = getSimulcastPublisher();
         mPublisher.setName(mPublisherName);
         mPublisher.setAudioFallbackEnabled(true);
         mPublisher.setPublisherListener(new PublisherKit.PublisherListener() {
@@ -329,4 +386,9 @@ public class Room extends Session {
             mActivity.setAudioOnlyViewLastParticipant(enableAudioOnly, mLastParticipant, this);
         }
     };
+
+    private void checkSimulcastMode(int item){
+
+
+    }
 }

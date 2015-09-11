@@ -40,10 +40,20 @@
             android:layout_marginTop="20dp"
             android:hint="@string/input_username_hint" />
 
+        <Spinner
+            android:id="@+id/combo_publisher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/input_username"
+            android:layout_marginTop="20dp"
+            android:entries="@array/pub_simulcast"
+            android:prompt="@string/pub_simulcast_prompt"
+            android:spinnerMode="dialog"/>
+
         <Button android:id="@+id/button_join_room"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_below="@+id/input_username"
+            android:layout_below="@+id/combo_publisher"
             android:layout_marginTop="20dp"
             android:layout_centerHorizontal="true"
             android:text="@string/button_join_room"
