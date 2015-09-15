@@ -1,11 +1,11 @@
 package com.opentok.android.meet;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
 import android.os.Handler;
-import android.provider.Telephony;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
@@ -24,11 +24,12 @@ import com.opentok.android.Publisher;
 import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
+import com.opentok.android.meet.video.CustomVideoCapturer;
 import com.opentok.android.profiler.PerformanceProfiler;
 
 import meet.android.opentok.com.opentokmeet.R;
 
-public class Room extends Session implements PerformanceProfiler.CPUStatListener, PerformanceProfiler.MemStatListener {
+public class Room extends Session implements PerformanceProfiler.CPUStatListener, PerformanceProfiler.MemStatListener, PerformanceProfiler.BatteryStatListener{
 
     private static final String LOGTAG = "opentok-meet-room";
 
@@ -60,6 +61,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     private ChatRoomActivity mActivity;
 
     PerformanceProfiler mProfiler;
+    private int initialBatteryLevel = 0;
 
     public Room(Context context, String roomName, String sessionId, String token, String apiKey,
                 String username) {
@@ -75,6 +77,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         mProfiler = new PerformanceProfiler(mContext);
         mProfiler.setCPUListener(this);
         mProfiler.setMemoryStatListener(this);
+        mProfiler.setBatteryStatListener(this);
     }
 
     public void setParticipantsViewContainer(LinearLayout container, ViewGroup lastParticipantView,
@@ -119,6 +122,12 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         return mLastParticipantView;
     }
 
+    @Override
+    public void disconnect() {
+        super.disconnect();
+        stopGetMetrics();
+    }
+
     //Callbacks
     @Override
     public void onPause() {
@@ -126,8 +135,6 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         if (mPublisher != null) {
             mPreview.setVisibility(View.GONE);
         }
-
-        stopGetMetrics();
     }
 
     @Override
@@ -215,7 +222,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         mPublisher.setPublisherListener(new PublisherKit.PublisherListener() {
             @Override
             public void onStreamCreated(PublisherKit publisherKit, Stream stream) {
-                Log.d(LOGTAG, "onStreamCreated!!");
+                Log.d(LOGTAG, "onStreamCreated!! " + stream.getStreamId());
             }
 
             @Override
@@ -228,6 +235,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
                 Log.d(LOGTAG, "onError!!");
             }
         });
+        mPublisher.setCapturer(new CustomVideoCapturer(mActivity));
         publish(mPublisher);
 
         // Add video preview
@@ -237,6 +245,8 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         v.setZOrderOnTop(true);
 
         mPreview.addView(v, lp);
+        mPublisher.getView().setOnClickListener(mActivity.onPubViewClick);
+        mPublisher.getView().setOnLongClickListener(mActivity.onPubStatusClick);
         mPublisher.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
                 BaseVideoRenderer.STYLE_VIDEO_FILL);
 
@@ -399,10 +409,10 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
 
 
     private void startGetMetrics(){
-       // mProfiler.startBatteryMetrics();
+        mProfiler.startBatteryMetrics();
 
         //start cpu profiling
-       // mProfiler.startCPUMetrics();
+        mProfiler.startCPUMetrics();
 
         //start mem profiling
         mProfiler.startMemMetrics();
@@ -410,10 +420,10 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     }
 
     private void stopGetMetrics(){
-       // mProfiler.stopBatteryMetrics();
+        mProfiler.stopBatteryMetrics();
 
         //start cpu profiling
-       // mProfiler.stopCPUMetrics();
+        mProfiler.stopCPUMetrics();
 
         //start mem profiling
         mProfiler.stopMemMetrics();
@@ -421,12 +431,28 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     }
 
     @Override
-    public void onCPU(float v, float v1) {
-        Log.d("MARINAS", "cpu values total "+v + "process:" + v1);
+    public void onCPU(float totalCpu, float pidCpu) {
+        Log.d(LOGTAG, "cpu values total " + totalCpu + "% process:" + pidCpu+"%");
+        DecimalFormat df = new DecimalFormat("##.##");
+
+        mActivity.statsInfo.set(0, "CPU stats. TotalCPU:  " + df.format(totalCpu) + "% PidCPU: "+ df.format(pidCpu)+"%");
     }
 
     @Override
-    public void onMemoryStat(double v, double v1, double v2, double v3) {
+    public void onMemoryStat(double available_mem, double total_mem, double used_mem, double used_per) {
+        Log.d(LOGTAG, "available mem: " + available_mem + "total_mem:" + total_mem + " used_mem: "+ used_mem + " used_per: " + used_per +"%");
+        DecimalFormat df = new DecimalFormat("####.##");
 
+        mActivity.statsInfo.set(1, "Memory stats. TotalMem: " + df.format(total_mem) + " UsedMem: " + df.format(used_mem) +" UsedMem per: "+ df.format(used_per) + "%");
+    }
+
+    @Override
+    public void onBatteryStat(int level, int scale, float batteryPer) {
+        Log.d(LOGTAG, "Battery level: " + level + "scale:" + scale + " batteryPer: " + batteryPer);
+
+        if (initialBatteryLevel == 0) {
+            initialBatteryLevel = level;
+        }
+        mActivity.statsInfo.set(2, "Battery stats. Battery consume: "+ (initialBatteryLevel-level)+"%");
     }
 }

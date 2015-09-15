@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -87,6 +88,8 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
     private LinearLayout mParticipantsView;
     private ProgressBar mLoadingSub; // Spinning wheel for loading subscriber view
 
+    public ArrayList<String> statsInfo = new ArrayList<String>() ;
+
     protected PublisherControlFragment mPublisherFragment;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -114,7 +117,6 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         mLastParticipantView = (ViewGroup) findViewById(R.id.mainsubscriberView);
         mLoadingSub = (ProgressBar) findViewById(R.id.loadingSpinner);
 
-
         Uri url = getIntent().getData();
         serverURL = getResources().getString(R.string.serverURL);
 
@@ -131,6 +133,10 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
 
         TextView title = (TextView) findViewById(R.id.title);
         title.setText(mRoomName);
+
+        statsInfo.add("CPU info stats are not available");
+        statsInfo.add("Memory info stats are not available");
+        statsInfo.add("Battery info stats are not available");
 
         mSimulcastPub = getIntent().getIntExtra(PUB_SIMULCAST, 0);
         if (savedInstanceState == null) {
@@ -270,21 +276,11 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
             mIsBound = false;
         }
 
-        if (mRoom != null) {
-            mRoom.disconnect();
-        }
-
         super.onDestroy();
-        finish();
     }
 
     @Override
     public void onBackPressed() {
-
-        if (mRoom != null) {
-            mRoom.disconnect();
-        }
-
         super.onBackPressed();
     }
 
@@ -374,7 +370,6 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
                 mConnectingDialog.dismiss();
                 mRoom = room;
                 mRoom.setPreviewView(mPreview);
-                mPreview.setOnClickListener(onViewClick);
                 mRoom.setParticipantsViewContainer(mParticipantsView, mLastParticipantView, null);
                 mRoom.setMessageView((TextView) findViewById(R.id.messageView),
                         (ScrollView) findViewById(R.id.scroller));
@@ -550,16 +545,13 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
 
     @Override
     public void onEndCall() {
-        if (mRoom != null) {
-            mRoom.disconnect();
-        }
-
         finish();
     }
 
-    private View.OnClickListener onViewClick = new View.OnClickListener() {
+    public View.OnLongClickListener onPubStatusClick = new View.OnLongClickListener() {
+
         @Override
-        public void onClick(View v) {
+        public boolean onLongClick(View v) {
             boolean visible = false;
 
             if (mRoom.getPublisher() != null) {
@@ -569,9 +561,50 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
                 }
                 mPublisherFragment.publisherClick();
             }
+            return visible;
         }
+
     };
 
+
+    public View.OnClickListener onPubViewClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            if (mRoom.getPublisher() != null) {
+                if (mRoom.getPublisher().getPublishVideo()) {
+                    mRoom.getPublisher().setPublishVideo(false);
+                    View audioOnlyView = getAudioOnlyIcon();
+                    audioOnlyView.setOnClickListener(this);
+                    audioOnlyView.setOnLongClickListener(onPubStatusClick);
+                    mPreview.removeAllViews();
+                    mPreview.addView(audioOnlyView);
+                }
+                else {
+                    mRoom.getPublisher().setPublishVideo(true);
+                    mRoom.getPublisher().getView().setOnClickListener(this);
+                    mRoom.getPublisher().getView().setOnLongClickListener(onPubStatusClick);
+                    mPreview.addView(mRoom.getPublisher().getView());
+                }
+
+                }
+            }
+
+    };
+
+    public void onStatsInfoClick(View v) {
+
+            new AlertDialog.Builder(ChatRoomActivity.this)
+                    .setTitle("Stats info")
+                    .setMessage(statsInfo.get(0) + "\n" + statsInfo.get(1) + "\n" +statsInfo.get(2))
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // continue with delete
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+    }
 
     public int getSimulcastPub() {
         return mSimulcastPub;

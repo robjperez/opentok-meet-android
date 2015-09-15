@@ -26,4 +26,15 @@
         android:onClick="onClickShareLink"
         android:src="@mipmap/share" />
 
+    <ImageView
+        android:id="@+id/stats_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="20dp"
+        android:layout_toLeftOf="@+id/share_icon"
+        android:contentDescription="@string/shareStr"
+        android:onClick="onStatsInfoClick"
+        android:src="@android:drawable/ic_menu_preferences" />
+
 </RelativeLayout>
