@@ -63,6 +63,8 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     PerformanceProfiler mProfiler;
     private int initialBatteryLevel = 0;
 
+    private CustomVideoCapturer mVideoCapturer;
+
     public Room(Context context, String roomName, String sessionId, String token, String apiKey,
                 String username) {
         super(context, apiKey, sessionId);
@@ -177,7 +179,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
 
         int simulcastLevel = mActivity.getSimulcastPub();
         Publisher publisher = null;
-
+        mVideoCapturer = new CustomVideoCapturer(mActivity);
         switch (simulcastLevel) {
             case 0: {
                 Log.d(LOGTAG, "Publisher simulcast is disabled");
@@ -187,23 +189,37 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
             }
             case 1: {
                 Log.d(LOGTAG, "Publisher simulcast: Default VGA");
+
+                mVideoCapturer.setmCaptureWidth(640);
+                mVideoCapturer.setmCaptureHeight(480);
+
                 publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevelVGA, 0, null);
+
                 break;
             }
             case 2: {
                 Log.d(LOGTAG, "Publisher simulcast: Default 720p");
+                mVideoCapturer.setmCaptureWidth(1280);
+                mVideoCapturer.setmCaptureHeight(720);
+
                 publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevel720p, 0, null);
                 break;
             }
 
             case 3: {
                 Log.d(LOGTAG, "Publisher simulcast: Custom VGA");
+                mVideoCapturer.setmCaptureWidth(640);
+                mVideoCapturer.setmCaptureHeight(480);
+
                 publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevelVGA, 1, getTemLayersAdj());
                 break;
             }
 
             case 4: {
                 Log.d(LOGTAG, "Publisher simulcast: Custom 720p");
+                mVideoCapturer.setmCaptureWidth(1280);
+                mVideoCapturer.setmCaptureHeight(720);
+
                 publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevel720p, 1, getTemLayersAdj());
                 break;
             }
@@ -222,7 +238,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         mPublisher.setPublisherListener(new PublisherKit.PublisherListener() {
             @Override
             public void onStreamCreated(PublisherKit publisherKit, Stream stream) {
-                Log.d(LOGTAG, "onStreamCreated!! " + stream.getStreamId());
+                Log.d(LOGTAG, "onStreamCreated!!");
             }
 
             @Override
@@ -235,7 +251,9 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
                 Log.d(LOGTAG, "onError!!");
             }
         });
-        mPublisher.setCapturer(new CustomVideoCapturer(mActivity));
+
+
+        mPublisher.setCapturer(mVideoCapturer);
         publish(mPublisher);
 
         // Add video preview

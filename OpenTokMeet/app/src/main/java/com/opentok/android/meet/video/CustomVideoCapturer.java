@@ -33,8 +33,8 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
     // changes
 
     private final static int PIXEL_FORMAT = ImageFormat.NV21;
-    private final static int PREFERRED_CAPTURE_WIDTH = 1280;
-    private final static int PREFERRED_CAPTURE_HEIGHT = 720;
+    private int PREFERRED_CAPTURE_WIDTH = 1280;
+    private int PREFERRED_CAPTURE_HEIGHT = 720;
 
     private boolean isCaptureStarted = false;
     private boolean isCaptureRunning = false;
@@ -42,7 +42,18 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
     private final int mNumCaptureBuffers = 3;
     private int mExpectedFrameSize = 0;
 
+    public void setmCaptureWidth(int mCaptureWidth) {
+        this.mCaptureWidth = mCaptureWidth;
+        this.PREFERRED_CAPTURE_WIDTH = mCaptureWidth;
+    }
+
     private int mCaptureWidth = -1;
+
+    public void setmCaptureHeight(int mCaptureHeight) {
+        this.mCaptureHeight = mCaptureHeight;
+        this.PREFERRED_CAPTURE_HEIGHT = mCaptureHeight;
+    }
+
     private int mCaptureHeight = -1;
     private int mCaptureFPS = -1;
 
@@ -308,6 +319,10 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
 
         mCaptureWidth = maxw;
         mCaptureHeight = maxh;
+
+        Log.d("MARINAS", "mCaptureWidth: "+mCaptureWidth);
+        Log.d("MARINAS", "mCaptureHeight: "+mCaptureHeight);
+
     }
 
     @Override

@@ -354,7 +354,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
             try {
                 OpenTokConfig.setAPIRootURL(BuildConfig.MEET_ENVIRONMENT, true);
                // OpenTokConfig.setOTKitLogs(true);
-               // OpenTokConfig.setJNILogs(true);
+                OpenTokConfig.setJNILogs(true);
                 //OpenTokConfig.setWebRTCLogs(true);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
