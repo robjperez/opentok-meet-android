@@ -29,8 +29,11 @@ public class HomeActivity extends Activity implements AdapterView.OnItemSelected
     private String username;
     private EditText roomNameInput;
     private EditText usernameInput;
-    private Spinner mSimulcastSpinner;
-    private int mSimulcastMode;
+    private Spinner mCapturerResolutionSpinner;
+    private String mCapturerResolution;
+
+    private Spinner mCapturerFpsSpinner;
+    private String mCapturerFps;
 
 
     /** Called when the activity is first created. */
@@ -53,14 +56,20 @@ public class HomeActivity extends Activity implements AdapterView.OnItemSelected
         usernameInput.setText(this.username);
 
 
-        mSimulcastSpinner = (Spinner) findViewById(R.id.combo_publisher);
-
-        mSimulcastSpinner.setOnItemSelectedListener(this);
-        String[] simulcastValues  = getResources().getStringArray(R.array.pub_simulcast);
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.simple_spinner_item, simulcastValues);
+        mCapturerResolutionSpinner = (Spinner) findViewById(R.id.combo_capturer_resolution);
+        mCapturerResolutionSpinner.setOnItemSelectedListener(this);
+        String[] capturerResolutionValues  = getResources().getStringArray(R.array.pub_capturer_resolution);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.simple_spinner_item, capturerResolutionValues);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCapturerResolutionSpinner.setAdapter(dataAdapter);
 
-        mSimulcastSpinner.setAdapter(dataAdapter);
+        mCapturerFpsSpinner = (Spinner) findViewById(R.id.combo_capturer_fps);
+        mCapturerFpsSpinner.setOnItemSelectedListener(this);
+        String[] capturerFpsValues  = getResources().getStringArray(R.array.pub_capturer_fps);
+        dataAdapter = new ArrayAdapter<String>(this, R.layout.simple_spinner_item, capturerFpsValues);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCapturerFpsSpinner.setAdapter(dataAdapter);
+
     }
 
     public void joinRoom(View v) {
@@ -72,7 +81,8 @@ public class HomeActivity extends Activity implements AdapterView.OnItemSelected
         Intent enterChatRoomIntent = new Intent(this, ChatRoomActivity.class);
         enterChatRoomIntent.putExtra(ChatRoomActivity.ARG_ROOM_ID, roomName);
         enterChatRoomIntent.putExtra(ChatRoomActivity.ARG_USERNAME_ID, username);
-        enterChatRoomIntent.putExtra(ChatRoomActivity.PUB_SIMULCAST, mSimulcastMode);
+        enterChatRoomIntent.putExtra(ChatRoomActivity.PUB_CAPTURER_RESOLUTION, mCapturerResolution);
+        enterChatRoomIntent.putExtra(ChatRoomActivity.PUB_CAPTURER_FPS, mCapturerFps);
         //save room name and username
         saveConferenceData();
 
@@ -99,12 +109,21 @@ public class HomeActivity extends Activity implements AdapterView.OnItemSelected
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        // On selecting a spinner item
-        mSimulcastMode = position;
 
-        String selectedSimulcast = parent.getItemAtPosition(position).toString();
-        // Showing selected spinner item
-        Toast.makeText(parent.getContext(), "Selected: " + selectedSimulcast, Toast.LENGTH_LONG).show();
+        Spinner spinner = (Spinner) parent;
+        if(spinner.getId() == R.id.combo_capturer_resolution) {
+            // On selecting a spinner item
+            mCapturerResolution = parent.getItemAtPosition(position).toString();
+            Toast.makeText(parent.getContext(), "Selected: " + mCapturerResolution, Toast.LENGTH_LONG).show();
+        }
+        else {
+            if(spinner.getId() == R.id.combo_capturer_fps) {
+                // On selecting a spinner item
+                mCapturerFps = parent.getItemAtPosition(position).toString();
+                Toast.makeText(parent.getContext(), "Selected: " + mCapturerFps, Toast.LENGTH_LONG).show();
+            }
+        }
+
     }
 
     @Override

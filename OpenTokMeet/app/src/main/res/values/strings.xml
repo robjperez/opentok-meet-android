@@ -27,14 +27,19 @@
 
     <string name="serverURL">"http://meet.tokbox.com/"</string>
 
-    <string name="pub_simulcast_prompt">Choose the publisher simulcast</string>
+    <string name="capturer_resolution_prompt">Choose the camera capturer resolution</string>
+    <string name="capturer_fps_prompt">Choose the camera capturer fps</string>
 
-    <string-array name="pub_simulcast">
-        <item>Simulcast: None</item>
-        <item>Simulcast: Default VGA</item>
-        <item>Simulcast: Default 720</item>
-        <item>Simulcast: Custom VGA</item>
-        <item>Simulcast: Custom 720</item>
+    <string-array name="pub_capturer_resolution">
+        <item>Capturer resolution: Medium</item>
+        <item>Capturer resolution: Low</item>
+        <item>Capturer resolution: High</item>
+    </string-array>
+    <string-array name="pub_capturer_fps">
+        <item>Capturer fps: 30</item>
+        <item>Capturer fps: 15</item>
+        <item>Capturer fps: 7</item>
+        <item>Capturer fps: 1</item>
     </string-array>
 
 </resources>

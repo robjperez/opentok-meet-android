@@ -41,19 +41,31 @@
             android:hint="@string/input_username_hint" />
 
         <Spinner
-            android:id="@+id/combo_publisher"
+            android:id="@+id/combo_capturer_resolution"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/input_username"
             android:layout_marginTop="20dp"
-            android:entries="@array/pub_simulcast"
-            android:prompt="@string/pub_simulcast_prompt"
-            android:spinnerMode="dialog"/>
+            android:entries="@array/pub_capturer_resolution"
+            android:prompt="@string/capturer_resolution_prompt"
+            android:spinnerMode="dialog"
+            android:visibility="visible"/>
+
+        <Spinner
+            android:id="@+id/combo_capturer_fps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/combo_capturer_resolution"
+            android:layout_marginTop="20dp"
+            android:entries="@array/pub_capturer_fps"
+            android:prompt="@string/capturer_fps_prompt"
+            android:spinnerMode="dialog"
+            android:visibility="visible"/>
 
         <Button android:id="@+id/button_join_room"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_below="@+id/combo_publisher"
+            android:layout_below="@+id/combo_capturer_fps"
             android:layout_marginTop="20dp"
             android:layout_centerHorizontal="true"
             android:text="@string/button_join_room"

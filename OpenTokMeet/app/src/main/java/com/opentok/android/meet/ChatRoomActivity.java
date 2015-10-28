@@ -46,9 +46,11 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.opentok.android.OpenTokConfig;
+import com.opentok.android.Publisher;
 import com.opentok.android.meet.fragments.PublisherControlFragment;
 import com.opentok.android.meet.services.ClearNotificationService;
 import com.opentok.android.meet.services.ClearNotificationService.ClearBinder;
@@ -65,14 +67,16 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
 
     public static final String ARG_ROOM_ID = "roomId";
     public static final String ARG_USERNAME_ID = "usernameId";
-    public static final String PUB_SIMULCAST = "PUB_SIMULCAST";
+    public static final String PUB_CAPTURER_RESOLUTION= "PUB_CAPTURER_RESOLUTION";
+    public static final String PUB_CAPTURER_FPS= "PUB_CAPTURER_FPS";
 
     private String serverURL = null;
     private String mRoomName;
     private Room mRoom;
     private String mUsername = null;
 
-    private int mSimulcastPub = 0;
+    private Publisher.CameraCaptureResolution mCapturerResolutionPub = Publisher.CameraCaptureResolution.MEDIUM;
+    private Publisher.CameraCaptureFrameRate mCapturerFpsPub = Publisher.CameraCaptureFrameRate.FPS_30;
 
     private ProgressDialog mConnectingDialog;
     private AlertDialog mErrorDialog;
@@ -87,6 +91,9 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
     private ViewGroup mLastParticipantView;
     private LinearLayout mParticipantsView;
     private ProgressBar mLoadingSub; // Spinning wheel for loading subscriber view
+
+    private String subsInfoStats = "SubInfoStat ";
+    private String pubInfoStats;
 
     public ArrayList<String> statsInfo = new ArrayList<String>() ;
 
@@ -138,8 +145,14 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         statsInfo.add("Memory info stats are not available");
         statsInfo.add("Battery info stats are not available");
 
-        mSimulcastPub = getIntent().getIntExtra(PUB_SIMULCAST, 0);
+        String resolution =  getIntent().getStringExtra(PUB_CAPTURER_RESOLUTION);
+        mCapturerResolutionPub = getPubCapturerResolution(resolution);
+
+        String framerate =  getIntent().getStringExtra(PUB_CAPTURER_FPS);
+        mCapturerFpsPub = getPubCapturerFrameRate(framerate);
+
         if (savedInstanceState == null) {
+            initPublisherFragment();
             initPublisherFragment();
         }
 
@@ -147,6 +160,45 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         initializeRoom();
 
+    }
+
+    private Publisher.CameraCaptureResolution getPubCapturerResolution(String resolution){
+        Publisher.CameraCaptureResolution capturerResolution;
+
+        if (resolution.contains("Low")){
+            capturerResolution = Publisher.CameraCaptureResolution.LOW;
+        }
+        else {
+            if (resolution.contains("Medium")){
+                capturerResolution = Publisher.CameraCaptureResolution.MEDIUM;
+            }
+            else {
+                capturerResolution = Publisher.CameraCaptureResolution.HIGH;
+            }
+        }
+        return capturerResolution;
+    }
+
+    private Publisher.CameraCaptureFrameRate getPubCapturerFrameRate(String fps){
+        Publisher.CameraCaptureFrameRate capturerFps;
+
+        if (fps.contains("FPS_1")){
+            capturerFps = Publisher.CameraCaptureFrameRate.FPS_1;
+        }
+        else {
+            if (fps.contains("FPS_7")){
+                capturerFps = Publisher.CameraCaptureFrameRate.FPS_7;
+            }
+            else {
+                if (fps.contains("FPS_7")) {
+                    capturerFps = Publisher.CameraCaptureFrameRate.FPS_15;
+                }
+                else {
+                    capturerFps = Publisher.CameraCaptureFrameRate.FPS_30;
+                }
+            }
+        }
+        return capturerFps;
     }
 
     @Override
@@ -290,7 +342,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
             public void run() {
 
                 if (mRoom != null && mRoom.getParticipants().size() > 0) {
-                    for(int i = 0; i< mRoom.getParticipants().size()-1; i++) {
+                    for (int i = 0; i < mRoom.getParticipants().size() - 1; i++) {
                         mRoom.getParticipantsViewContainer()
                                 .addView(mRoom.getParticipants().get(i).getView());
                     }
@@ -593,10 +645,11 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
     };
 
     public void onStatsInfoClick(View v) {
-
+            getPubStats();
+            getSubStats();
             new AlertDialog.Builder(ChatRoomActivity.this)
                     .setTitle("Stats info")
-                    .setMessage(statsInfo.get(0) + "\n" + statsInfo.get(1) + "\n" +statsInfo.get(2))
+                    .setMessage(statsInfo.get(0) + "\n" + statsInfo.get(1) + "\n" +statsInfo.get(2) + "\n" + subsInfoStats + "\n" +pubInfoStats)
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // continue with delete
@@ -606,8 +659,87 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
                     .show();
     }
 
-    public int getSimulcastPub() {
-        return mSimulcastPub;
+    public Publisher.CameraCaptureResolution getCapturerResolutionPub() {
+        return mCapturerResolutionPub;
     }
 
+    public Publisher.CameraCaptureFrameRate getCapturerFpsPub() {
+        return mCapturerFpsPub;
+    }
+
+    public void getPubStats(){
+        if(mRoom.getPublisher() != null) {
+            String audioBytesSent, videoBytesSent;
+            String videoFramerate, videoWidth, videoHeight;
+
+            audioBytesSent = videoBytesSent = null;
+            videoFramerate = videoWidth = videoHeight = null;
+
+            Publisher mPublisher = mRoom.getPublisher();
+            long[] videoStreams  = OpenTokConfig.getPublisherVideoStreams(mPublisher);
+            long[] audioStreams = OpenTokConfig.getPublisherAudioStreams(mPublisher);
+
+            if (audioStreams!= null && audioStreams.length > 0 ) {
+                audioBytesSent = OpenTokConfig.getPublisherStat(mPublisher, audioStreams[0], "bytesSent");
+            }
+            if (videoStreams!=null && videoStreams.length > 0 ) {
+                videoBytesSent = OpenTokConfig.getPublisherStat(mPublisher, videoStreams[0], "bytesSent");
+
+                videoFramerate = OpenTokConfig.getPublisherStat(mPublisher, videoStreams[0], "googFrameRateSent");
+
+                videoWidth = OpenTokConfig.getPublisherStat(mPublisher, videoStreams[0], "googFrameWidthSent");
+
+                videoHeight = OpenTokConfig.getPublisherStat(mPublisher, videoStreams[0], "googFrameHeightSent");
+            }
+
+            String stats = "PubInfoStats -> "+ " audioBytesSent:"+audioBytesSent + " videoBytesSent:"+videoBytesSent+
+                    "videoFps:"+videoFramerate + " width:"+videoWidth + " height:"+videoHeight;
+
+            pubInfoStats = stats;
+
+        }
+    }
+
+    public void getSubStats(){
+        Log.d(LOGTAG, "Method getSubStat got called.");
+        subsInfoStats = "SubInfoStat ";
+        if(mRoom.getParticipants() != null && mRoom.getParticipants().size() > 0) {
+            for (int i=0; i<mRoom.getParticipants().size(); i++){
+                String audioBytesReceived, videoBytesReceived;
+                String videoWidth, videoHeight, videoFramerate;
+                videoWidth = videoHeight = videoFramerate = null;
+                audioBytesReceived = videoBytesReceived = null;
+
+                Participant mParticipant = mRoom.getParticipants().get(i);
+
+                long[] videoStreams  = OpenTokConfig.getSubscriberVideoStreams(mParticipant);
+                long[] audioStreams = OpenTokConfig.getSubscriberAudioStreams(mParticipant);
+                if (audioStreams!= null && audioStreams.length > 0 ) {
+                    audioBytesReceived = OpenTokConfig.getSubscriberStat(mParticipant, audioStreams[0], "bytesReceived");
+                }
+
+                if (videoStreams!= null && videoStreams.length > 0 ) {
+                    videoBytesReceived = OpenTokConfig.getSubscriberStat(mParticipant, videoStreams[0], "bytesReceived");
+
+                    videoFramerate = OpenTokConfig.getSubscriberStat(mParticipant, videoStreams[0], "googFrameRateReceived");
+
+                    videoWidth = OpenTokConfig.getSubscriberStat(mParticipant, videoStreams[0], "googFrameWidthReceived");
+
+                    videoHeight = OpenTokConfig.getSubscriberStat(mParticipant, videoStreams[0], "googFrameHeightReceived");
+                }
+
+
+                String stats = mParticipant.getName() + "-> audioBytesReceived:"+audioBytesReceived + " videoBytesReceived:"+videoBytesReceived+
+                        "videoFps:"+videoFramerate + " width:"+videoWidth + " height:"+videoHeight;
+
+                Log.d(LOGTAG, stats);
+
+                subsInfoStats = subsInfoStats + "; " + stats + "\n";
+            }
+            }
+
+
+
+
+    }
 }

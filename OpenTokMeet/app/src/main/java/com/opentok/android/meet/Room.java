@@ -175,55 +175,10 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         }
         return tempLadj;
     }
-    private Publisher getSimulcastPublisher(){
+    private Publisher getCustomPublisher(){
 
-        int simulcastLevel = mActivity.getSimulcastPub();
         Publisher publisher = null;
-        mVideoCapturer = new CustomVideoCapturer(mActivity);
-        switch (simulcastLevel) {
-            case 0: {
-                Log.d(LOGTAG, "Publisher simulcast is disabled");
-                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevelNone, 0, null);
-
-                break;
-            }
-            case 1: {
-                Log.d(LOGTAG, "Publisher simulcast: Default VGA");
-
-                mVideoCapturer.setmCaptureWidth(640);
-                mVideoCapturer.setmCaptureHeight(480);
-
-                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevelVGA, 0, null);
-
-                break;
-            }
-            case 2: {
-                Log.d(LOGTAG, "Publisher simulcast: Default 720p");
-                mVideoCapturer.setmCaptureWidth(1280);
-                mVideoCapturer.setmCaptureHeight(720);
-
-                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevel720p, 0, null);
-                break;
-            }
-
-            case 3: {
-                Log.d(LOGTAG, "Publisher simulcast: Custom VGA");
-                mVideoCapturer.setmCaptureWidth(640);
-                mVideoCapturer.setmCaptureHeight(480);
-
-                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevelVGA, 1, getTemLayersAdj());
-                break;
-            }
-
-            case 4: {
-                Log.d(LOGTAG, "Publisher simulcast: Custom 720p");
-                mVideoCapturer.setmCaptureWidth(1280);
-                mVideoCapturer.setmCaptureHeight(720);
-
-                publisher = new Publisher(mContext, "Android", true, true, PublisherKit.PublisherKitSimulcastLevel.PublisherKitSimulcastLevel720p, 1, getTemLayersAdj());
-                break;
-            }
-        }
+        publisher = new Publisher(mContext, "Android", mActivity.getCapturerResolutionPub(), mActivity.getCapturerFpsPub());
         return publisher;
     }
 
@@ -232,7 +187,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         //check simulcast case for publisher
 
         //mPublisher = new Publisher(mContext, "Android");
-        mPublisher = getSimulcastPublisher();
+        mPublisher = getCustomPublisher();
         mPublisher.setName(mPublisherName);
         mPublisher.setAudioFallbackEnabled(true);
         mPublisher.setPublisherListener(new PublisherKit.PublisherListener() {
@@ -268,7 +223,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         mPublisher.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
                 BaseVideoRenderer.STYLE_VIDEO_FILL);
 
-        startGetMetrics();
+        //startGetMetrics();
 
     }
 
@@ -461,7 +416,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         Log.d(LOGTAG, "available mem: " + available_mem + "total_mem:" + total_mem + " used_mem: "+ used_mem + " used_per: " + used_per +"%");
         DecimalFormat df = new DecimalFormat("####.##");
 
-        mActivity.statsInfo.set(1, "Memory stats. TotalMem: " + df.format(total_mem) + " UsedMem: " + df.format(used_mem) +" UsedMem per: "+ df.format(used_per) + "%");
+        mActivity.statsInfo.set(1, "Memory stats. UsedMem: " + df.format(used_mem) +" UsedMem per: "+ df.format(used_per) + "%");
     }
 
     @Override
