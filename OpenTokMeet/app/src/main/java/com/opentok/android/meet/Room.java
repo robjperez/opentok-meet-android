@@ -228,6 +228,18 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     }
 
     @Override
+    protected void onReconnecting() {
+        super.onReconnecting();
+        mActivity.showReconnectingDialog(true);
+    }
+
+    @Override
+    protected void onReconnected() {
+        super.onReconnected();
+        mActivity.showReconnectingDialog(false);
+    }
+
+    @Override
     protected void onStreamReceived(Stream stream) {
 
         Participant p = new Participant(mContext, stream);

@@ -98,6 +98,8 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
     public ArrayList<String> statsInfo = new ArrayList<String>() ;
 
     protected PublisherControlFragment mPublisherFragment;
+    private   ProgressDialog dialog;
+
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -667,6 +669,24 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         return mCapturerFpsPub;
     }
 
+    public void showReconnectingDialog(boolean show){
+        if (show) {
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.setMessage("Reconnecting. Please wait...");
+            dialog.setIndeterminate(true);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        }
+        else {
+            dialog.dismiss();
+            AlertDialog.Builder builder = new AlertDialog.Builder(ChatRoomActivity.this);
+            builder.setMessage("Session has been reconnected")
+                    .setPositiveButton(android.R.string.ok, null);
+            builder.create();
+            builder.show();
+        }
+    }
+
     public void getPubStats(){
         if(mRoom.getPublisher() != null) {
             String audioBytesSent, videoBytesSent;
@@ -737,9 +757,6 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
                 subsInfoStats = subsInfoStats + "; " + stats + "\n";
             }
             }
-
-
-
 
     }
 }
