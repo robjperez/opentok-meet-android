@@ -14,12 +14,12 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "String", "MEET_ENVIRONMENT", "\"$System.env.MEET_ENVIRONMENT\""
-            //buildConfigField "String", "MEET_ENVIRONMENT", "\"http://anvil-tbdev.opentok.com\""
+            //buildConfigField "String", "MEET_ENVIRONMENT", "\"$System.env.MEET_ENVIRONMENT\""
+            buildConfigField "String", "MEET_ENVIRONMENT", "\"http://anvil-tbdev.opentok.com\""
         }
         release {
-            buildConfigField "String", "MEET_ENVIRONMENT", "\"$System.env.MEET_ENVIRONMENT\""
-            //buildConfigField "String", "MEET_ENVIRONMENT", "\"http://anvil-tbdev.opentok.com\""
+            //buildConfigField "String", "MEET_ENVIRONMENT", "\"$System.env.MEET_ENVIRONMENT\""
+            buildConfigField "String", "MEET_ENVIRONMENT", "\"http://anvil-tbdev.opentok.com\""
         }
     }
 

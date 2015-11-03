@@ -223,7 +223,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         mPublisher.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
                 BaseVideoRenderer.STYLE_VIDEO_FILL);
 
-        //startGetMetrics();
+        startGetMetrics();
 
     }
 
