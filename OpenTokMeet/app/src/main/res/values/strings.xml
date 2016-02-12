@@ -25,7 +25,7 @@
     <string name="sharingLink">Please join me at</string>
     <string	name="clearNotificationService">Clear Notification</string>
 
-    <string name="serverURL">"http://meet.tokbox.com/"</string>
+    <string name="serverURL">"https://meet.tokbox.com/"</string>
 
     <string name="capturer_resolution_prompt">Choose the camera capturer resolution</string>
     <string name="capturer_fps_prompt">Choose the camera capturer fps</string>
