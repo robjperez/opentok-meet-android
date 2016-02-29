@@ -63,8 +63,6 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     PerformanceProfiler mProfiler;
     private int initialBatteryLevel = 0;
 
-    private CustomVideoCapturer mVideoCapturer;
-
     public Room(Context context, String roomName, String sessionId, String token, String apiKey,
                 String username) {
         super(context, apiKey, sessionId);
@@ -207,8 +205,6 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
             }
         });
 
-
-        mPublisher.setCapturer(mVideoCapturer);
         publish(mPublisher);
 
         // Add video preview
