@@ -125,7 +125,9 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     @Override
     public void disconnect() {
         super.disconnect();
-        stopGetMetrics();
+        if (mProfiler != null) {
+            stopGetMetrics();
+        }
     }
 
     //Callbacks
@@ -305,6 +307,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     protected void onError(OpentokError error) {
         super.onError(error);
         Toast.makeText(this.mContext, error.getMessage(), Toast.LENGTH_SHORT).show();
+        mProfiler = null;
     }
 
     public void loadSubscriberView() {
