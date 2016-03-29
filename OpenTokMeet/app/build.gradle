@@ -12,17 +12,6 @@ android {
         versionName "1.0"
     }
 
-    buildTypes {
-        debug {
-            buildConfigField "String", "MEET_ENVIRONMENT", "\"$System.env.MEET_ENVIRONMENT\""
-            //buildConfigField "String", "MEET_ENVIRONMENT", "\"https://anvil-tbdev.opentok.com\""
-        }
-        release {
-            buildConfigField "String", "MEET_ENVIRONMENT", "\"$System.env.MEET_ENVIRONMENT\""
-            //buildConfigField "String", "MEET_ENVIRONMENT", "\"https://anvil-tbdev.opentok.com\""
-        }
-    }
-
     sourceSets {
         main {
             jniLibs.srcDir 'jniLibs'
@@ -33,5 +22,5 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile(name:'opentok-android-sdk-webrtc-release', ext:'aar')
+    compile 'com.opentok.android:opentok-android-sdk-nightly:+'
 }

@@ -15,8 +15,8 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        flatDir {
-            dirs 'libs'
+        maven {
+            url "https://tokbox.bintray.com/maven/"
         }
     }
 }
