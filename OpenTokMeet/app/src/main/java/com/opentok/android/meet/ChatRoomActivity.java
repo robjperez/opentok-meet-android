@@ -1,17 +1,18 @@
 package com.opentok.android.meet;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ActionBar;
@@ -63,7 +64,7 @@ import static meet.android.opentok.com.opentokmeet.R.color.black;
 
 public class ChatRoomActivity extends Activity implements PublisherControlFragment.PublisherCallbacks {
 
-    private static final String LOGTAG = "opentok-meet-chat-room";
+    private static final String LOGTAG = ChatRoomActivity.class.getName();
 
     public static final String ARG_ROOM_ID = "roomId";
     public static final String ARG_USERNAME_ID = "usernameId";
@@ -372,55 +373,63 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
 
     private class GetRoomDataTask extends AsyncTask<String, Void, Room> {
 
-        protected HttpClient mHttpClient;
+        private String getRoomDetails(String room) throws IOException {
+            String urlStr = getResources().getString(R.string.serverURL) + room;
 
-        protected HttpGet mHttpGet;
+            URL url = new URL(urlStr);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json, text/plain, */*");
+            connection.connect();
+            InputStream inputStream = connection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+            if (inputStream == null) {
+                return null;
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        protected boolean mDidCompleteSuccessfully;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line + "\n");
+            }
 
-        public GetRoomDataTask() {
-            mHttpClient = new DefaultHttpClient();
+            if (buffer.length() == 0) {
+                return null;
+            }
+            return buffer.toString();
         }
 
         @Override
         protected Room doInBackground(String... params) {
-            String sessionId = null;
-            String token = null;
-            String apiKey = null;
-            initializeGetRequest(params[0]);
+            String jsonString = null;
             try {
-                HttpResponse roomResponse = mHttpClient.execute(mHttpGet);
-                HttpEntity roomEntity = roomResponse.getEntity();
-                String temp = EntityUtils.toString(roomEntity);
-                Log.i(LOGTAG, "retrieved room response: " + temp);
-                JSONObject roomJson = new JSONObject(temp);
-                sessionId = roomJson.getString("sessionId");
-                token = roomJson.getString("token");
-                apiKey = roomJson.getString("apiKey");
-                mDidCompleteSuccessfully = true;
-            } catch (Exception exception) {
-                Log.e(LOGTAG,
-                        "could not get room data: " + exception.getMessage());
-                mDidCompleteSuccessfully = false;
+                jsonString = getRoomDetails(params[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (jsonString == null) {
                 return null;
             }
 
+            Room retValue = null;
             try {
-                OpenTokConfig.setAPIRootURL(BuildConfig.MEET_ENVIRONMENT, true);
-               // OpenTokConfig.setOTKitLogs(true);
-                OpenTokConfig.setJNILogs(true);
-                //OpenTokConfig.setWebRTCLogs(true);
-            } catch (MalformedURLException e) {
+                JSONObject roomJson = new JSONObject(jsonString);
+                String sessionId = roomJson.getString("sessionId");
+                String token = roomJson.getString("token");
+                String apiKey = roomJson.getString("apiKey");
+
+                retValue =  new Room(ChatRoomActivity.this, params[0], sessionId, token,
+                        apiKey, params[1]);
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            return new Room(ChatRoomActivity.this, params[0], sessionId, token,
-                    apiKey, params[1]);
+            return retValue;
         }
 
         @Override
         protected void onPostExecute(final Room room) {
-            if (mDidCompleteSuccessfully) {
+            if (room != null) {
                 mConnectingDialog.dismiss();
                 mRoom = room;
                 mRoom.setPreviewView(mPreview);
@@ -433,29 +442,6 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
                 mConnectingDialog = null;
                 showErrorDialog();
             }
-        }
-
-        protected void initializeGetRequest(String room) {
-            URI roomURI;
-            URL url;
-
-            String urlStr = getResources().getString(R.string.serverURL) + room;
-            try {
-                url = new URL(urlStr);
-                roomURI = new URI(url.getProtocol(), url.getUserInfo(),
-                        url.getHost(), url.getPort(), url.getPath(),
-                        url.getQuery(), url.getRef());
-            } catch (URISyntaxException exception) {
-                Log.e(LOGTAG,
-                        "the room URI is malformed: " + exception.getMessage());
-                return;
-            } catch (MalformedURLException exception) {
-                Log.e(LOGTAG,
-                        "the room URI is malformed: " + exception.getMessage());
-                return;
-            }
-            mHttpGet = new HttpGet(roomURI);
-            mHttpGet.addHeader("Accept", "application/json, text/plain, */*");
         }
     }
 

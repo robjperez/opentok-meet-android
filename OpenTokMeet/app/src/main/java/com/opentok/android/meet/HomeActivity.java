@@ -18,6 +18,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.opentok.android.OpenTokConfig;
+
 
 public class HomeActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
@@ -70,6 +72,9 @@ public class HomeActivity extends Activity implements AdapterView.OnItemSelected
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCapturerFpsSpinner.setAdapter(dataAdapter);
 
+        // OpenTokConfig.setOTKitLogs(true);
+        // OpenTokConfig.setJNILogs(true);
+        // OpenTokConfig.setWebRTCLogs(true);
     }
 
     public void joinRoom(View v) {
