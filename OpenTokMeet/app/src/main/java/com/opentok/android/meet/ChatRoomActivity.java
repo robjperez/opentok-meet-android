@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 
 import org.json.JSONException;
@@ -38,16 +34,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.opentok.android.OpenTokConfig;
@@ -56,10 +48,7 @@ import com.opentok.android.meet.fragments.PublisherControlFragment;
 import com.opentok.android.meet.services.ClearNotificationService;
 import com.opentok.android.meet.services.ClearNotificationService.ClearBinder;
 
-import meet.android.opentok.com.opentokmeet.BuildConfig;
 import meet.android.opentok.com.opentokmeet.R;
-
-import static meet.android.opentok.com.opentokmeet.R.color.black;
 
 
 public class ChatRoomActivity extends Activity implements PublisherControlFragment.PublisherCallbacks {
@@ -82,7 +71,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
     private ProgressDialog mConnectingDialog;
     private AlertDialog mErrorDialog;
 
-    protected Handler mHandler = new Handler();
+    private Handler mHandler = new Handler();
     private NotificationCompat.Builder mNotifyBuilder;
     private NotificationManager mNotificationManager;
     private ServiceConnection mConnection;
@@ -96,9 +85,9 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
     private String subsInfoStats = "SubInfoStat ";
     private String pubInfoStats;
 
-    public ArrayList<String> statsInfo = new ArrayList<String>() ;
+    public ArrayList<String> statsInfo = new ArrayList<>() ;
 
-    protected PublisherControlFragment mPublisherFragment;
+    private PublisherControlFragment mPublisherFragment;
     private   ProgressDialog dialog;
 
 
@@ -334,12 +323,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         super.onDestroy();
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    public void reloadInterface() {
+    private void reloadInterface() {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -382,7 +366,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
             connection.setRequestProperty("Accept", "application/json, text/plain, */*");
             connection.connect();
             InputStream inputStream = connection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (inputStream == null) {
                 return null;
             }
@@ -390,7 +374,8 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
 
             String line;
             while ((line = reader.readLine()) != null) {
-                buffer.append(line + "\n");
+                buffer.append(line);
+                buffer.append("\n");
             }
 
             if (buffer.length() == 0) {
@@ -418,8 +403,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
                 String token = roomJson.getString("token");
                 String apiKey = roomJson.getString("apiKey");
 
-                retValue =  new Room(ChatRoomActivity.this, params[0], sessionId, token,
-                        apiKey, params[1]);
+                retValue =  new Room(ChatRoomActivity.this, sessionId, token, apiKey, params[1]);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -457,8 +441,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         builder.setMessage(R.string.error);
         builder.setCancelable(false);
         builder.setPositiveButton("OK", errorListener);
-        mErrorDialog = builder.create();
-        mErrorDialog.show();
+        builder.create().show();
     }
 
     public void onClickShareLink(View v) {
@@ -485,8 +468,6 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
 
     //Show audio only icon when video quality changed and it is disabled for the last subscriber
     public void setAudioOnlyViewLastParticipant(boolean audioOnlyEnabled, Participant participant, View.OnClickListener clickLastParticipantListener) {
-        boolean subscriberVideoOnly = audioOnlyEnabled;
-
         if (audioOnlyEnabled) {
             this.mRoom.getLastParticipantView().removeView(participant.getView());
             View audioOnlyView = getAudioOnlyIcon();
@@ -494,10 +475,8 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
             audioOnlyView.setOnClickListener(clickLastParticipantListener);
             //TODO add audiometer
         } else {
-            if (!subscriberVideoOnly) {
-                this.mRoom.getLastParticipantView().removeAllViews();
-                this.mRoom.getLastParticipantView().addView(participant.getView());
-            }
+            this.mRoom.getLastParticipantView().removeAllViews();
+            this.mRoom.getLastParticipantView().addView(participant.getView());
         }
     }
 
@@ -531,7 +510,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         return (int) (screenDensity * (double) dp);
     }
 
-    public ImageView getAudioOnlyIcon() {
+    private ImageView getAudioOnlyIcon() {
 
         ImageView imageView = new ImageView(this);
 
@@ -543,25 +522,21 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
     }
 
     protected LinearLayout.LayoutParams getVGALayoutParams(){
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                640, 480);
-        return lp;
+        return new LinearLayout.LayoutParams(640, 480);
     }
 
-    protected LinearLayout.LayoutParams getQVGALayoutParams(){
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                480, 320);
-        return lp;
+    LinearLayout.LayoutParams getQVGALayoutParams(){
+        return new LinearLayout.LayoutParams(480, 320);
     }
 
-    protected LinearLayout.LayoutParams getMainLayoutParams(){
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        return lp;
+    LinearLayout.LayoutParams getMainLayoutParams(){
+        return new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        );
     }
 
     //Initialize fragments
-    public void initPublisherFragment() {
+    private void initPublisherFragment() {
         mPublisherFragment = new PublisherControlFragment();
         getFragmentManager().beginTransaction()
                 .add(R.id.fragment_pub_container, mPublisherFragment)
@@ -579,7 +554,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
     @Override
     public void onSwapCamera() {
         if (mRoom.getPublisher() != null) {
-            mRoom.getPublisher().swapCamera();
+            mRoom.getPublisher().cycleCamera();
         }
     }
 
@@ -673,7 +648,7 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
         }
     }
 
-    public void getPubStats(){
+    private void getPubStats(){
         if(mRoom.getPublisher() != null) {
             String audioBytesSent, videoBytesSent;
             String videoFramerate, videoWidth, videoHeight;
@@ -698,15 +673,12 @@ public class ChatRoomActivity extends Activity implements PublisherControlFragme
                 videoHeight = OpenTokConfig.getPublisherStat(mPublisher, videoStreams[0], "googFrameHeightSent");
             }
 
-            String stats = "PubInfoStats -> "+ " audioBytesSent:"+audioBytesSent + " videoBytesSent:"+videoBytesSent+
+            pubInfoStats = "PubInfoStats -> "+ " audioBytesSent:"+audioBytesSent + " videoBytesSent:"+videoBytesSent+
                     "videoFps:"+videoFramerate + " width:"+videoWidth + " height:"+videoHeight;
-
-            pubInfoStats = stats;
-
         }
     }
 
-    public void getSubStats(){
+    private void getSubStats(){
         Log.d(LOGTAG, "Method getSubStat got called.");
         subsInfoStats = "SubInfoStat ";
         if(mRoom.getParticipants() != null && mRoom.getParticipants().size() > 0) {

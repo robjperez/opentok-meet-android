@@ -24,10 +24,7 @@ import com.opentok.android.Publisher;
 import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
-import com.opentok.android.meet.video.CustomVideoCapturer;
 import com.opentok.android.profiler.PerformanceProfiler;
-
-import meet.android.opentok.com.opentokmeet.R;
 
 public class Room extends Session implements PerformanceProfiler.CPUStatListener, PerformanceProfiler.MemStatListener, PerformanceProfiler.BatteryStatListener{
 
@@ -43,10 +40,9 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
     private Participant mLastParticipant;
     private int mCurrentPosition;
     private String mPublisherName = null;
-    private HashMap<Stream, Participant> mParticipantStream = new HashMap<Stream, Participant>();
-    private HashMap<String, Participant> mParticipantConnection
-            = new HashMap<String, Participant>();
-     private ArrayList<Participant> mParticipants = new ArrayList<Participant>();
+    private HashMap<Stream, Participant> mParticipantStream = new HashMap<>();
+    private HashMap<String, Participant> mParticipantConnection = new HashMap<>();
+    private ArrayList<Participant> mParticipants = new ArrayList<>();
 
     private ViewGroup mPreview;
     private TextView mMessageView;
@@ -60,10 +56,10 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
 
     private ChatRoomActivity mActivity;
 
-    PerformanceProfiler mProfiler;
+    private PerformanceProfiler mProfiler;
     private int initialBatteryLevel = 0;
 
-    public Room(Context context, String roomName, String sessionId, String token, String apiKey,
+    public Room(Context context, String sessionId, String token, String apiKey,
                 String username) {
         super(context, apiKey, sessionId);
         this.apikey = apiKey;
@@ -176,10 +172,12 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         return tempLadj;
     }
     private Publisher getCustomPublisher(){
-
-        Publisher publisher = null;
-        publisher = new Publisher(mContext, "Android", mActivity.getCapturerResolutionPub(), mActivity.getCapturerFpsPub());
-        return publisher;
+        return new Publisher(
+                mContext,
+                "Android",
+                mActivity.getCapturerResolutionPub(),
+                mActivity.getCapturerFpsPub()
+        );
     }
 
     @Override
@@ -356,7 +354,7 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
         }
     };
 
-    View.OnClickListener clickListener = new View.OnClickListener() {
+    private View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
 
@@ -371,14 +369,14 @@ public class Room extends Session implements PerformanceProfiler.CPUStatListener
             }
         int index = mParticipantsViewContainer.indexOfChild(participant.getView());
         if (index == -1) {
-            index = (int) view.getId();
+            index = view.getId();
         }
         mActivity.setAudioOnlyViewListPartcipants(enableAudioOnly, participant, index, this);
 
         }
     };
 
-    View.OnClickListener clickLastParticipantListener = new View.OnClickListener() {
+    private View.OnClickListener clickLastParticipantListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             boolean enableAudioOnly = mLastParticipant.getSubscribeToVideo();
