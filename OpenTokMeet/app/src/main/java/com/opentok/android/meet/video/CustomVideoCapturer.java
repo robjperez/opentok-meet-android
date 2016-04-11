@@ -11,16 +11,14 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
-
 import com.opentok.android.BaseVideoCapturer;
 
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class CustomVideoCapturer extends BaseVideoCapturer implements
-        PreviewCallback {
+public class CustomVideoCapturer extends BaseVideoCapturer implements PreviewCallback {
 
-    private final static String LOGTAG = "opentok-meet-customer-video-capturer";
+    private final static String LOGTAG = CustomVideoCapturer.class.getName();
 
     private int mCameraIndex = 0;
     private Camera mCamera;
@@ -32,33 +30,34 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
     // surface
     // changes
 
-    private final static int PIXEL_FORMAT = ImageFormat.NV21;
-    private int PREFERRED_CAPTURE_WIDTH = 1280;
-    private int PREFERRED_CAPTURE_HEIGHT = 720;
+    private final static int PIXEL_FORMAT               = ImageFormat.NV21;
+    private final static int DEFAULT_CAPTURE_WIDTH      = 1280;
+    private final static int DEFAULT_CAPTURE_HEIGHT     = 720;
+    private final static int NUM_CAPTURE_BUFFERS        = 3;
 
     private boolean isCaptureStarted = false;
     private boolean isCaptureRunning = false;
-
-    private final int mNumCaptureBuffers = 3;
     private int mExpectedFrameSize = 0;
 
-    public void setmCaptureWidth(int mCaptureWidth) {
-        this.mCaptureWidth = mCaptureWidth;
-        this.PREFERRED_CAPTURE_WIDTH = mCaptureWidth;
-    }
+    private int mPreferredCaptureWidth = DEFAULT_CAPTURE_WIDTH;
+    private int mPreferredCaptureHeight= DEFAULT_CAPTURE_HEIGHT;
 
     private int mCaptureWidth = -1;
-
-    public void setmCaptureHeight(int mCaptureHeight) {
-        this.mCaptureHeight = mCaptureHeight;
-        this.PREFERRED_CAPTURE_HEIGHT = mCaptureHeight;
-    }
-
     private int mCaptureHeight = -1;
     private int mCaptureFPS = -1;
 
     private Display mCurrentDisplay;
-    private SurfaceTexture mSurfaceTexture;
+
+
+    public void setmCaptureWidth(int captureWidth) {
+        mCaptureWidth = captureWidth;
+        mPreferredCaptureWidth = mCaptureWidth;
+    }
+
+    public void setmCaptureHeight(int captureHeight) {
+        mCaptureHeight = captureHeight;
+        mPreferredCaptureHeight = mCaptureHeight;
+    }
 
     public CustomVideoCapturer(Context context) {
 
@@ -79,7 +78,7 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
         }
 
         // Set the preferred capturing size
-        configureCaptureSize(PREFERRED_CAPTURE_WIDTH, PREFERRED_CAPTURE_HEIGHT);
+        configureCaptureSize(mPreferredCaptureWidth, mPreferredCaptureHeight);
 
         // Set the capture parameters
         Camera.Parameters parameters = mCamera.getParameters();
@@ -96,17 +95,13 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
         // Create capture buffers
         PixelFormat pixelFormat = new PixelFormat();
         PixelFormat.getPixelFormatInfo(PIXEL_FORMAT, pixelFormat);
-        int bufSize = mCaptureWidth * mCaptureHeight * pixelFormat.bitsPerPixel
-                / 8;
-        byte[] buffer = null;
-        for (int i = 0; i < mNumCaptureBuffers; i++) {
-            buffer = new byte[bufSize];
-            mCamera.addCallbackBuffer(buffer);
+        int bufSize = mCaptureWidth * mCaptureHeight * pixelFormat.bitsPerPixel / 8;
+        for (int i = 0; i < NUM_CAPTURE_BUFFERS; i++) {
+            mCamera.addCallbackBuffer(new byte[bufSize]);
         }
 
         try {
-            mSurfaceTexture = new SurfaceTexture(42);
-            mCamera.setPreviewTexture(mSurfaceTexture);
+            mCamera.setPreviewTexture(new SurfaceTexture(42));
 
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -165,7 +160,7 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
     public CaptureSettings getCaptureSettings() {
 
         // Set the preferred capturing size
-        configureCaptureSize(PREFERRED_CAPTURE_WIDTH, PREFERRED_CAPTURE_HEIGHT);
+        configureCaptureSize(mPreferredCaptureWidth, mPreferredCaptureHeight);
 
         CaptureSettings settings = new CaptureSettings();
         settings.fps = mCaptureFPS;
@@ -178,10 +173,12 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
 
     @Override
     public void onPause() {
+        // Does Nothing
     }
 
     @Override
     public void onResume() {
+        // Does Nothing
     }
 
     /*
@@ -198,7 +195,7 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
     /*
      * Check if the current camera is a front camera
      */
-    public boolean isFrontCamera() {
+    private boolean isFrontCamera() {
         return (mCurrentDeviceInfo != null && mCurrentDeviceInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
     }
 
@@ -254,9 +251,8 @@ public class CustomVideoCapturer extends BaseVideoCapturer implements
                 break;
         }
 
+        int totalCameraRotation;
         int cameraOrientation = this.getNaturalCameraOrientation();
-
-        int totalCameraRotation = 0;
         boolean usingFrontCamera = this.isFrontCamera();
         if (usingFrontCamera) {
             // The front camera rotates in the opposite direction of the

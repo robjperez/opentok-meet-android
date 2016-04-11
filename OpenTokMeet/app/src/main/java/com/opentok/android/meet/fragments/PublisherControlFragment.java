@@ -19,7 +19,7 @@ import meet.android.opentok.com.opentokmeet.R;
 public class PublisherControlFragment extends Fragment implements
         View.OnClickListener {
 
-    private static final String LOGTAG = "opentok-meet-pub-control-fragment";
+    private static final String LOGTAG = PublisherControlFragment.class.getName();
 
     // Animation constants
     private static final int ANIMATION_DURATION = 500;
@@ -30,18 +30,14 @@ public class PublisherControlFragment extends Fragment implements
     private Button mEndCall;
     private RelativeLayout mPublisherContainer;
     private PublisherCallbacks mCallbacks = sOpenTokCallbacks;
-    protected boolean mPublisherWidgetVisible = false;
+    private boolean mPublisherWidgetVisible = false;
 
     private ChatRoomActivity chatRoomActivity;
 
     public interface PublisherCallbacks {
-
-        public void onMutePublisher();
-
-        public void onSwapCamera();
-
-        public void onEndCall();
-
+        void onMutePublisher();
+        void onSwapCamera();
+        void onEndCall();
     }
 
     private static PublisherCallbacks sOpenTokCallbacks = new PublisherCallbacks() {

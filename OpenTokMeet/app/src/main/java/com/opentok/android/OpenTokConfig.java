@@ -49,15 +49,11 @@ public class OpenTokConfig {
     }
 
     public static String getPublisherInfoStats(PublisherKit publisher) {
-        String publisherStats = getPublisherInfoStatsNative(publisher);
-
-        return publisherStats;
+        return getPublisherInfoStatsNative(publisher);
     }
 
     public static String getSubscriberInfoStats(SubscriberKit subscriber) {
-        String subscriberStats = getSubscriberInfoStatsNative(subscriber);
-
-        return subscriberStats;
+        return getSubscriberInfoStatsNative(subscriber);
     }
 
     public static String getPublisherStat(PublisherKit publisher, long stream, String key){
@@ -85,8 +81,7 @@ public class OpenTokConfig {
     }
 
     public static String getSDKVersion(Session session){
-        String sdkVersion = getSDKVersionNative(session);
-        return sdkVersion;
+        return getSDKVersionNative(session);
     }
 
     public static native void setProxy(String host, int port);

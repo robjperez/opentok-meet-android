@@ -71,7 +71,6 @@
         android:id="@+id/messagebox"
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.50"
         android:background="#FFFFFF"
         android:orientation="horizontal"
         android:visibility="gone"
@@ -111,7 +110,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="false"
             android:onClick="onClickSend"
-            android:text="send" />
+            android:text="@string/send" />
     </RelativeLayout>
 
     <RelativeLayout
